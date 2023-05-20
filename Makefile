@@ -64,14 +64,17 @@ build_muslc:
 	[ "`cat configure_line 2>&1`" != "${configure_line}" ] && [ -e Makefile.muslc ] && \
 		$(MAKE) CFLAGS="${CFLAGS}" CC="${CC}" CROSS_COMPILE="${CROSS_COMPILE}" -f Makefile.muslc clean || true
 
-	# If the configure line did change (or we don't have one yet) then we also need to (re)run configure
-	# Only print output if there's an error as configure is quite noisy
-	# Also need to update the ARCH in the config.mak file configure generates
+# echo "`cat configure_line 2>&1`"
+# echo "${configure_line}"
+
+# If the configure line did change (or we don't have one yet) then we also need to (re)run configure
+# Only print output if there's an error as configure is quite noisy
+# Also need to update the ARCH in the config.mak file configure generates
 	[ "`cat configure_line 2>&1`" != "${configure_line}" ] && \
-		${SOURCE_DIR}/configure ${configure_line} 2>&1 > config.log || cat config.log  && sed -ibak 's/^ARCH = \(.*\)/ARCH = \1_sel4/' config.mak || true
-	# Store the current configuration
+		${SOURCE_DIR}/configure ${configure_line} 2>&1 > config.log || cat config.log  && sed -ibak 's/^ARCH =.*/ARCH = ${TARGET}_sel4/' config.mak || true
+# Store the current configuration
 	echo "${configure_line}" > configure_line
-	# Symlink in the correct Makefile as the configure script doesn't know that we renamed the muslc one
+# Symlink in the correct Makefile as the configure script doesn't know that we renamed the muslc one
 	[ -e Makefile.muslc ] || ln -s ${SOURCE_DIR}/Makefile.muslc Makefile.muslc
 	$(MAKE) CFLAGS="${CFLAGS}" CC="${CC}" CROSS_COMPILE="${CROSS_COMPILE}" -f Makefile.muslc
 	$(MAKE) CFLAGS="${CFLAGS}" CC="${CC}" CROSS_COMPILE="${CROSS_COMPILE}" -f Makefile.muslc install-libs install-headers
